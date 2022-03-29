@@ -11,9 +11,9 @@ class ScanDelegate(DefaultDelegate):
 
     def handleDiscovery(self, dev, isNewDev, isNewData):
         if isNewDev or isNewData: # 新しいデバイスまたは新しいデータ
-            # print(dev.getScanData())
-            for (adtype, desc, value) in dev.getScanData():
-                print(value)
+            print(dev.getScanData())
+            # for (adtype, desc, value) in dev.getScanData():
+            #     print(adtype," ",desc," ",value)
             # for (adtype, desc, value) in dev.getScanData(): # データの数だけ繰り返す
             #     if desc == 'Manufacturer' and value[0:4] == 'ffff': # テスト用companyID
             #         __delta = datetime.now() - self.lasttime
