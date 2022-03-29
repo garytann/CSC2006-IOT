@@ -13,9 +13,9 @@
 #define temperatureCelsius
 
 //define the bluetooh server name 
-#define bleServerName "BME280_ESP32"
+#define bleServerName "BME280"
 
-#define SERVICE_UUID "91bad492-b950-4226-aa2b-4ede9fa42f59"
+#define SERVICE_UUID "91bad492-b950-4226-aa2b-4ede9fa42f60"
 
 float temp; 
 float hum;
@@ -25,7 +25,7 @@ bool deviceConnected = false;
 
 // Timer variables
 unsigned long lastTime = 0;
-unsigned long timerDelay = 30000;
+unsigned long timerDelay = 10000;
 
 static BLEUUID bmeServiceUUID("91bad492-b950-4226-aa2b-4ede9fa42f59");
 
@@ -56,21 +56,11 @@ void setup(){
   
 }
 void loop() {
-//  if (! sgp.IAQmeasure()) {
-//    Serial.println("Measurement failed");
-//    return;
-//  }
-//  float tmp = dht12.readTemperature();
-//  float hum = dht12.readHumidity();
-//  float CO2 = sgp.eCO2;
-//  M5.Lcd.setCursor(0, 20, 2);
-//  M5.Lcd.printf("Temp: %2.1f \n", tmp);
-//  M5.Lcd.printf("Humi: %2.0f%% \n", hum);
-//  Serial.print(CO2);
   if(deviceConnected){
     if((millis() - lastTime) > timerDelay){
       temp = dht12.readTemperature();
       hum = dht12.readHumidity();
+      M5.Lcd.setCursor(0,20,2);
       M5.Lcd.printf("Temp: %2.1f \n", temp);
       M5.Lcd.printf("Humi: %2.0f%% \n", hum);
 
@@ -118,7 +108,7 @@ void setupBluetooth(){
 
   bmeService->addCharacteristic(&bmeHumidityCharacteristics);
   bmeHumidityDescriptor.setValue("BME humidity");
-  bmeHumidityCharacteristics.addDescriptor(new BLE2902());
+  bmeHumidityCharacteristics.addDescriptor(&bmeHumidityDescriptor);
 
   // Start the service
   bmeService->start();
@@ -136,15 +126,4 @@ void setupDHT12(){
   M5.begin();
   Wire.begin(0,26);
   M5.Lcd.setRotation(3);
-  M5.Lcd.setCursor(0, 0, 2);
 }
-
-
-// //start reading from sensor
-// void readDHT12(){
-//   temp = dht12.readTemperature();
-//   hum = dht12.readHumidity();
-// //  M5.Lcd.printf("Temp: %2.1f \n", temp);
-// //  M5.Lcd.printf("Humi: %2.0f%% \n", hum);
-//   delay(1000);
-// }
