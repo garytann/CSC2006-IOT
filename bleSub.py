@@ -4,6 +4,8 @@ import time
 import sys
 import paho.mqtt.client as mqtt
 import json
+from sense_hat import SenseHat
+
 
 
 
@@ -20,8 +22,9 @@ client.username_pw_set(ACCESS_TOKEN)
 
 # Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
 client.connect(THINGSBOARD_HOST, 1883, 60)
-#client.loop_start()
 
+# Init sensehat
+sense = SenseHat()
 
 #p = btle.Peripheral("4C:75:25:CB:D2:B2")
 #Gary
@@ -42,13 +45,25 @@ while True:
         
         while True:
             if pTempnHumidity.waitForNotifications(15000) or pCO2.waitForNotifications(15000):
-                print("Humidity: ", humidityCharacteristic.read().decode(), " Temperature Celsius: ", temperatureCharacteristic.read().decode(), " CO2: ", co2Characteristic.read().decode())
-                sensor_data['Temperature'] = humidityCharacteristic.read().decode()
-                sensor_data['Humidity'] = temperatureCharacteristic.read().decode()
-                sensor_data['Carbon Dioxide'] = co2Characteristic.read().decode()
-
+                temp = temperatureCharacteristic.read().decode()
+                humid = humidityCharacteristic.read().decode()
+                co2 = co2Characteristic.read().decode()
+                print("Humidity: ", humid, " Temperature Celsius: ", temp, " CO2: ", co2)
+                sensor_data['Temperature'] = temp
+                sensor_data['Humidity'] = humid
+                sensor_data['Carbon Dioxide'] = co2
+                
                 client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
+                with open("log.txt", "a+") as file_object:
+                    # Append 'hello' at the end of file
+                    file_object.write("Temp: {0}, Humidity: {1}, CO2: {2}\n".format(temp,humid,co2))
+
+                if(float(co2) > 500.0):
+                    sense.clear((255,255,255))
+                else:
+                    sense.clear((100,80,255))
+
                 #print(c1.read().decode())
                 #print(c2.read().decode())
-    except:
-        pass
+    except KeyboardInterrupt:
+        quit()
