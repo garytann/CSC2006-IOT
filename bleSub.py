@@ -44,7 +44,7 @@ while True:
 
         
         while True:
-            if pTempnHumidity.waitForNotifications(15000) or pCO2.waitForNotifications(15000):
+            if pTempnHumidity.waitForNotifications(75000) or pCO2.waitForNotifications(75000):
                 temp = temperatureCharacteristic.read().decode()
                 humid = humidityCharacteristic.read().decode()
                 co2 = co2Characteristic.read().decode()
