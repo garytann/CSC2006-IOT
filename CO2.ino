@@ -9,17 +9,19 @@
 #include "BLE2902.h"
 
 //define the bluetooh server name 
-#define bleServerName "I_see_CO2"
+#define bleServerName "CO2_data"
 
+//define service UUID 
 #define SERVICE_UUID "91bad492-b950-4226-aa2b-4ede9fa42f59"
 
+// init variables to be used
 float CO2;
 Adafruit_SGP30 sgp;
 bool deviceConnected = false;
 
-// Timer variables
+// init timer variables
 unsigned long lastTime = 0;
-unsigned long timerDelay = 1000;
+unsigned long timerDelay = 60000; // 1min
 
 static BLEUUID bmeServiceUUID("91bad492-b950-4226-aa2b-4ede9fa42f59");
 
@@ -43,7 +45,7 @@ void setupBluetooth(){
   //create the BLE device
   BLEDevice::init(bleServerName);
 
-// Create the BLE Server
+  // Create the BLE Server
   BLEDevice::init(bleServerName);
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
@@ -51,7 +53,8 @@ void setupBluetooth(){
   //create BLE service
   BLEService *bmeService = pServer->createService(SERVICE_UUID);
 
- bmeService->addCharacteristic(&bmeCarbonDioxideCharacteristics);
+  // setting bluetooth characteristics
+  bmeService->addCharacteristic(&bmeCarbonDioxideCharacteristics);
     bmeCarbonDioxideDescriptor.setValue("BME Carbon Dioxide Value");
     bmeCarbonDioxideCharacteristics.addDescriptor(&bmeCarbonDioxideDescriptor);
 
@@ -66,6 +69,7 @@ void setupBluetooth(){
 }
 
 void setup(){
+  // setting up of serial and M5 sticks parameters
   Serial.begin(115200);
   M5.begin();
   sgp.begin();
@@ -75,18 +79,23 @@ void setup(){
 }
 
 void loop() {
+  
+  // check for any devices connection
   if(deviceConnected){
     if((millis() - lastTime) > timerDelay){
+      
+      // measure the CO2
       sgp.IAQmeasure();
       float CO2 = sgp.eCO2;
       M5.Lcd.setCursor(0, 20, 2);
       M5.Lcd.printf("CO2: %2.1f", CO2);
-
-      //notify temperature reading from dht12
       static char carbon[6];
       dtostrf(CO2, 6, 2, carbon);
+
+      // setting the values into the bluetooth characteristic
       bmeCarbonDioxideCharacteristics.setValue(carbon);
       bmeCarbonDioxideCharacteristics.notify();
+      
       Serial.print("Carbon Dioxide: ");
       Serial.println(CO2);
       lastTime = millis();
