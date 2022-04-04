@@ -5,12 +5,13 @@ import sys
 import paho.mqtt.client as mqtt
 import json
 from sense_hat import SenseHat
+from datetime import datetime
 
 
 
 
-THINGSBOARD_HOST = 'demo.thingsboard.io'
-ACCESS_TOKEN = 'V7V5E98eB4DHhlyAHeXz'
+THINGSBOARD_HOST = 'thingsboard.cloud'
+ACCESS_TOKEN = '3qqqZyJcsDZMH3dmzIaG'
 
 sensor_data = {'Temperature': 0, 'Humidity': 0, 'Carbon Dioxide': 0}
 
@@ -21,10 +22,15 @@ client = mqtt.Client()
 client.username_pw_set(ACCESS_TOKEN)
 
 # Connect to ThingsBoard using default MQTT port and 60 seconds keepalive interval
-client.connect(THINGSBOARD_HOST, 1883, 60)
+client.connect(THINGSBOARD_HOST, 1883, 80)
 
 # Init sensehat
 sense = SenseHat()
+
+#init a time
+now = datetime.now()
+
+current_time = now.strftime("%H:%M:%S")
 
 #p = btle.Peripheral("4C:75:25:CB:D2:B2")
 #Gary
@@ -56,7 +62,8 @@ while True:
                 client.publish('v1/devices/me/telemetry', json.dumps(sensor_data), 1)
                 with open("log.txt", "a+") as file_object:
                     # Append 'hello' at the end of file
-                    file_object.write("Temp: {0}, Humidity: {1}, CO2: {2}\n".format(temp,humid,co2))
+                    file_object.write("Time: {0}, Temp: {1}, Humidity: {2}, CO2: {3}\n".format(current_time,temp,humid,co2))
+                    time.sleep(1)
 
                 if(float(co2) > 500.0):
                     sense.clear((255,255,255))
